@@ -1,0 +1,289 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout>
+  <main class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA] px-8 py-6 flex justify-between items-center transition-shadow duration-300">
+  <div class="max-w-6xl mx-auto w-full flex justify-between items-center">
+      <a href="/" class="flex items-center gap-2 group">
+  <div class="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center group-hover:bg-[#F97316] transition-colors duration-300">
+    <span class="font-mono text-white text-sm font-bold">SR</span>
+  </div>
+  <span class="font-mono text-[#1A1A2E] text-sm font-medium hidden md:block">sroberts.dev</span>
+</a>
+      <div class="flex gap-8 text-sm font-medium text-[#6B7280]">
+        <a href="#about" class="hover:text-[#1A1A2E] transition-colors">About</a>
+        <a href="#projects" class="hover:text-[#1A1A2E] transition-colors">Projects</a>
+        <a href="#blog" class="hover:text-[#1A1A2E] transition-colors">Blog</a>
+        <a href="#contact" class="hover:text-[#1A1A2E] transition-colors">Contact</a>
+      </div>
+	</div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="max-w-6xl mx-auto px-8 pt-32 pb-32">
+      <p class="font-mono text-[#F97316] text-sm mb-4 tracking-wider">Hello, I'm</p>
+      <h1 class="text-6xl font-extrabold text-[#1A1A2E] mb-4 leading-tight">
+        Scott Roberts
+      </h1>
+      <div class="flex items-center gap-2 mb-8">
+        <span class="font-mono text-[#2563EB] text-xl" id="typewriter"></span>
+        <span class="font-mono text-[#F97316] text-xl animate-pulse">|</span>
+      </div>
+      <p class="text-lg text-[#6B7280] max-w-2xl mb-10 leading-relaxed">
+        Final year BSc Applied Computing student at USW with a passion for cyber security, 
+        penetration testing and building things that matter. Based in Caerphilly, Wales.
+      </p>
+      <div class="flex gap-4">
+        <a href="#projects" class="bg-[#2563EB] text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+          View My Work
+        </a>
+        <a href="#contact" class="border border-[#2563EB] text-[#2563EB] px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+          Get In Touch
+        </a>
+      </div>
+    </section>
+
+    <!-- Credentials Strip -->
+    <section class="bg-[#1A1A2E] py-12">
+      <div class="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div>
+          <p class="text-[#F97316] text-3xl font-extrabold">2nd</p>
+          <p class="text-white text-sm mt-1">Skills Wales National<br/>Cyber Security Competition</p>
+        </div>
+        <div>
+          <p class="text-[#F97316] text-3xl font-extrabold">164</p>
+          <p class="text-white text-sm mt-1">Immersive Labs<br/>Completions</p>
+        </div>
+        <div>
+          <p class="text-[#F97316] text-3xl font-extrabold">BSc</p>
+          <p class="text-white text-sm mt-1">Applied Computing<br/>University of South Wales</p>
+        </div>
+      </div>
+</section>
+
+    <!-- About -->
+    <section id="about" class="max-w-6xl mx-auto px-8 py-24">
+      <p class="font-mono text-[#F97316] text-sm tracking-wider mb-2">01 — About</p>
+      <h2 class="text-4xl font-extrabold text-[#1A1A2E] mb-8">Who I Am</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+        <div>
+          <p class="text-[#6B7280] leading-relaxed mb-4">
+            I'm a final year BSc Applied Computing student at the University of South Wales with a 
+            genuine passion for cyber security. I placed 2nd in the Skills Wales national cyber 
+            security competition — competing against professionals actively working in the industry 
+            as apprentices — and have completed 164 labs on Immersive Labs covering everything from 
+            Linux fundamentals to CVE exploitation and digital forensics.
+          </p>
+          <p class="text-[#6B7280] leading-relaxed mb-8">
+            I'm working towards my CPTS certification and building my practical skills through 
+            Hack The Box. I also founded CaerFortis, a cyber security consultancy based in 
+            Caerphilly, delivering awareness training to local businesses.
+          </p>
+          <a href="/about" class="font-medium text-[#2563EB] hover:text-blue-700 transition-colors flex items-center gap-2">
+            More about me 
+            <span class="text-[#F97316]">→</span>
+          </a>
+        </div>
+		<div class="space-y-4">
+          <div class="border-l-4 border-[#2563EB] pl-4">
+            <p class="font-semibold text-[#1A1A2E]">Level 3 ICT Systems Technician</p>
+            <p class="text-sm text-[#6B7280]">Coleg y Cymoedd — 2023/24</p>
+          </div>
+          <div class="border-l-4 border-[#F97316] pl-4">
+            <p class="font-semibold text-[#1A1A2E]">Skills Wales Cyber Security Competition</p>
+            <p class="text-sm text-[#6B7280]">2nd Place — National Level — 2024</p>
+          </div>
+          <div class="border-l-4 border-[#2563EB] pl-4">
+            <p class="font-semibold text-[#1A1A2E]">FdSc ICT Systems</p>
+            <p class="text-sm text-[#6B7280]">University of South Wales — 2024/26</p>
+          </div>
+          <div class="border-l-4 border-[#2563EB] pl-4">
+            <p class="font-semibold text-[#1A1A2E]">BSc Applied Computing</p>
+            <p class="text-sm text-[#6B7280]">University of South Wales — 2026/27</p>
+          </div>
+          <div class="border-l-4 border-[#F97316] pl-4">
+            <p class="font-semibold text-[#1A1A2E]">CaerFortis Ltd — Founder</p>
+            <p class="text-sm text-[#6B7280]">Cyber Security Consultancy — Est. 2026</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+	<!-- Projects -->
+    <section id="projects" class="bg-[#F3F4F6] py-24">
+      <div class="max-w-6xl mx-auto px-8">
+        <p class="font-mono text-[#F97316] text-sm tracking-wider mb-2">02 — Projects</p>
+        <h2 class="text-4xl font-extrabold text-[#1A1A2E] mb-12">What I've Built & Solved</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- Card 1 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">CTF</span>
+            </div>
+            <h3 class="font-bold text-[#1A1A2E] mb-2">Skills Wales Competition</h3>
+            <p class="text-sm text-[#6B7280] leading-relaxed">Placed 2nd in the national Skills Wales cyber security competition, competing against industry apprentices actively working in the sector.</p>
+            <p class="text-xs font-mono text-[#F97316] mt-4">2nd Place — National Level</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Research</span>
+            </div>
+            <h3 class="font-bold text-[#1A1A2E] mb-2">Social Media & Productivity Study</h3>
+            <p class="text-sm text-[#6B7280] leading-relaxed">Independent research study surveying 380 respondents on the effects of social media consumption on student productivity and wellbeing.</p>
+            <p class="text-xs font-mono text-[#F97316] mt-4">380 Respondents</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Dev</span>
+            </div>
+            <h3 class="font-bold text-[#1A1A2E] mb-2">VR Game — Unity & Blender</h3>
+            <p class="text-sm text-[#6B7280] leading-relaxed">Developed a virtual reality game using C#, Unity and Blender as part of my foundation degree — combining technical problem solving with creative design.</p>
+            <p class="text-xs font-mono text-[#F97316] mt-4">C# — Unity — Blender</p>
+          </div>
+
+          <!-- Card 4 — Placeholder -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB]">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">HTB</span>
+            </div>
+            <h3 class="font-bold text-[#6B7280] mb-2">Hack The Box Writeups</h3>
+            <p class="text-sm text-[#9CA3AF] leading-relaxed">CTF writeups and machine solutions coming soon as I work through Hack The Box and build my practical pen testing skills.</p>
+            <p class="text-xs font-mono text-[#9CA3AF] mt-4">Coming Soon</p>
+          </div>
+
+          <!-- Card 5 — Placeholder -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB]">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">CTF</span>
+            </div>
+            <h3 class="font-bold text-[#6B7280] mb-2">CTF Challenges</h3>
+            <p class="text-sm text-[#9CA3AF] leading-relaxed">Original CTF challenges I've designed and built — coming soon.</p>
+            <p class="text-xs font-mono text-[#9CA3AF] mt-4">Coming Soon</p>
+          </div>
+
+          <!-- Card 6 — Placeholder -->
+          <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB]">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">Lab</span>
+            </div>
+            <h3 class="font-bold text-[#6B7280] mb-2">Home Lab</h3>
+            <p class="text-sm text-[#9CA3AF] leading-relaxed">Building a home lab environment for penetration testing practice and security research — documentation coming soon.</p>
+            <p class="text-xs font-mono text-[#9CA3AF] mt-4">Coming Soon</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+<!-- Blog -->
+    <section id="blog" class="max-w-6xl mx-auto px-8 py-24">
+      <p class="font-mono text-[#F97316] text-sm tracking-wider mb-2">03 — Blog</p>
+      <h2 class="text-4xl font-extrabold text-[#1A1A2E] mb-4">Thoughts & Writeups</h2>
+      <p class="text-[#6B7280] mb-12 max-w-2xl">Security concepts, CTF writeups, learning notes and industry thoughts. Written for people who are curious about cyber security — not just those already in it.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+
+        <!-- Blog placeholder 1 -->
+        <div class="border border-[#E5E7EB] rounded-xl p-6 hover:border-[#2563EB] transition-colors">
+          <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Coming Soon</span>
+          <h3 class="font-bold text-[#1A1A2E] mt-4 mb-2">What is a CTF and why should you care?</h3>
+          <p class="text-sm text-[#6B7280]">An introduction to Capture The Flag competitions and how they translate to real world security skills.</p>
+        </div>
+
+        <!-- Blog placeholder 2 -->
+        <div class="border border-[#E5E7EB] rounded-xl p-6 hover:border-[#2563EB] transition-colors">
+          <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Coming Soon</span>
+          <h3 class="font-bold text-[#1A1A2E] mt-4 mb-2">Why small businesses are the biggest cyber security target</h3>
+          <p class="text-sm text-[#6B7280]">Most attacks don't target large corporations — here's why your local solicitor is more at risk than you think.</p>
+        </div>
+
+        <!-- Blog placeholder 3 -->
+        <div class="border border-[#E5E7EB] rounded-xl p-6 hover:border-[#2563EB] transition-colors">
+          <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Coming Soon</span>
+          <h3 class="font-bold text-[#1A1A2E] mt-4 mb-2">Getting started with Hack The Box as a complete beginner</h3>
+          <p class="text-sm text-[#6B7280]">A honest guide to starting HTB when you feel like you don't know enough — because nobody ever does.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Contact CTA -->
+    <section id="contact" class="bg-[#1A1A2E] py-24">
+      <div class="max-w-6xl mx-auto px-8 text-center">
+        <p class="font-mono text-[#F97316] text-sm tracking-wider mb-4">04 — Contact</p>
+        <h2 class="text-4xl font-extrabold text-white mb-4">Let's Talk</h2>
+        <p class="text-[#6B7280] max-w-xl mx-auto mb-10 leading-relaxed">
+          Whether you're interested in CaerFortis cyber awareness training, want to discuss 
+          an opportunity, or just want to talk cyber security — I'd love to hear from you.
+        </p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+          <a href="mailto:scott@caerfortis.co.uk" class="bg-[#F97316] text-white px-8 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors">
+            Get In Touch
+          </a>
+          <a href="https://linkedin.com/in/scottroberts" target="_blank" class="border border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-[#1A1A2E] transition-colors">
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#1A1A2E] border-t border-white/10 py-6">
+      <div class="max-w-6xl mx-auto px-8 flex justify-between items-center">
+        <span class="font-mono text-[#6B7280] text-sm">© 2026 Scott Roberts</span>
+        <span class="font-mono text-[#6B7280] text-sm">sroberts.dev</span>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Typewriter Script -->
+  <script>
+    const roles = [
+      'penetration tester in training',
+      'cyber security enthusiast',
+      'CTF competitor',
+      'BSc computing student',
+    ];
+    let roleIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    const el = document.getElementById('typewriter');
+
+    function type() {
+      const current = roles[roleIndex];
+      if (!deleting) {
+        el.textContent = current.slice(0, charIndex + 1);
+        charIndex++;
+        if (charIndex === current.length) {
+          deleting = true;
+          setTimeout(type, 2000);
+          return;
+        }
+      } else {
+        el.textContent = current.slice(0, charIndex - 1);
+        charIndex--;
+        if (charIndex === 0) {
+          deleting = false;
+          roleIndex = (roleIndex + 1) % roles.length;
+        }
+      }
+      setTimeout(type, deleting ? 50 : 80);
+    }
+    type();
+
+	const navbar = document.getElementById('navbar');
+	window.addEventListener('scroll', () => {
+  		if (window.scrollY > 10) {
+    		navbar.classList.add('shadow-md');
+  		} else {
+    		navbar.classList.remove('shadow-md');
+ 		}
+	});
+  </script>
+</Layout>
