@@ -33,56 +33,61 @@ import Layout from '../../layouts/Layout.astro';
         this grows as I complete more.
       </p>
     </section>
+<!-- Bento grid -->
+    <section class="max-w-6xl mx-auto px-4 md:px-8 pb-24">
+      <div class="grid grid-cols-2 md:grid-cols-4 auto-rows-auto md:auto-rows-[170px] gap-4 md:gap-6 grid-flow-dense">
 
-    <!-- Bento grid -->
-    <section class="max-w-6xl mx-auto px-8 pb-24">
-
- <div class="grid grid-cols-4 auto-rows-[170px] gap-6 grid-flow-dense">
         <!-- Skills Wales — flagship, large -->
-        <a id="skills-wales" href="/projects/skills-wales" class="col-span-2 row-span-2 bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group scroll-mt-24">
+        <a id="skills-wales" href="/projects/skills-wales" class="col-span-2 row-span-1 md:row-span-2 bg-white rounded-xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg transition-shadow duration-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:ring-offset-2">
           <div>
             <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">CTF</span>
-            <h3 class="font-bold text-[#1A1A2E] text-2xl mt-4 mb-2">Skills Wales Competition</h3>
+            <h3 class="font-bold text-[#1A1A2E] text-xl md:text-2xl mt-4 mb-2">Skills Wales Competition</h3>
             <p class="text-sm text-[#6B7280] leading-relaxed">Placed 2nd in the national Skills Wales cyber security competition, competing against industry apprentices actively working in the sector.</p>
           </div>
-          <p class="text-xs font-mono text-[#F97316] group-hover:underline">2nd Place — National Level →</p>
+          <p class="text-xs font-mono text-[#F97316] group-hover:underline mt-4">2nd Place — National Level →</p>
         </a>
+
         <!-- VR Game — wide -->
-        <a id="vr-game" href="/projects/vr-game" class="col-span-2 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group scroll-mt-24">
+        <a id="vr-game" href="/projects/vr-game" class="col-span-2 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg transition-shadow duration-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:ring-offset-2">
           <div>
             <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Dev</span>
             <h3 class="font-bold text-[#1A1A2E] mt-3 mb-1">VR Game — Unity &amp; Blender</h3>
             <p class="text-sm text-[#6B7280] leading-relaxed">C#, Unity and Blender, built as part of my foundation degree.</p>
           </div>
-          <p class="text-xs font-mono text-[#F97316] group-hover:underline">See the build →</p>
+          <p class="text-xs font-mono text-[#F97316] group-hover:underline mt-2">See the build →</p>
         </a>
-        <!-- HTB Writeups — tall, grows over time -->
-        <a id="htb-writeups" href="/projects/htb-writeups" class="col-span-1 row-span-2 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] flex flex-col justify-between group scroll-mt-24">
+
+        <!-- HTB Writeups — tall on desktop, normal on mobile -->
+        <a id="htb-writeups" href="/projects/htb-writeups" class="col-span-1 row-span-1 md:row-span-2 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] flex flex-col justify-between group scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg transition-shadow duration-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316] focus-visible:ring-offset-2">
           <div>
             <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">HTB</span>
             <h3 class="font-bold text-[#6B7280] mt-3 mb-1">Hack The Box Writeups</h3>
             <p class="text-sm text-[#9CA3AF] leading-relaxed">CTF writeups and machine solutions as I work through Hack The Box.</p>
           </div>
-          <p class="text-xs font-mono text-[#9CA3AF]">Coming soon</p>
+          <p class="text-xs font-mono text-[#9CA3AF] mt-2">Coming soon</p>
         </a>
+
         <!-- Social Media Research — normal -->
-        <div id="social-media-study" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow scroll-mt-24">
+        <a id="social-media-study" href="/projects/social-media-study" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg duration-700">
           <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Research</span>
           <h3 class="font-bold text-[#1A1A2E] mt-3 mb-1">Social Media &amp; Productivity Study</h3>
           <p class="text-xs font-mono text-[#F97316] mt-2">380 Respondents</p>
-        </div>
+        </a>
+
         <!-- CTF Challenges — normal, placeholder -->
-        <div id="ctf-challenges" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] scroll-mt-24">
+        <div id="ctf-challenges" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg duration-700">
           <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">CTF</span>
           <h3 class="font-bold text-[#6B7280] mt-3 mb-1">CTF Challenges</h3>
           <p class="text-xs font-mono text-[#9CA3AF] mt-2">Coming soon</p>
         </div>
+
         <!-- Home Lab — normal, placeholder -->
-        <div id="home-lab" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] scroll-mt-24">
+        <div id="home-lab" class="col-span-1 row-span-1 bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-2 border-dashed border-[#E5E7EB] scroll-mt-24 target:ring-2 target:ring-[#2563EB] target:ring-offset-4 target:shadow-lg duration-700">
           <span class="bg-[#F3F4F6] text-[#6B7280] text-xs font-mono px-2 py-1 rounded">Lab</span>
           <h3 class="font-bold text-[#6B7280] mt-3 mb-1">Home Lab</h3>
           <p class="text-xs font-mono text-[#9CA3AF] mt-2">Coming soon</p>
         </div>
+
       </div>
     </section>
 
@@ -105,18 +110,14 @@ import Layout from '../../layouts/Layout.astro';
       }
     });
   </script>
+
   <script>
-  const hash = window.location.hash.slice(1);
-  if (hash) {
-    const target = document.getElementById(hash);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      target.classList.add('ring-2', 'ring-[#2563EB]', 'ring-offset-2');
-      setTimeout(() => {
-        target.classList.add('transition-all', 'duration-1000');
-        target.classList.remove('ring-2', 'ring-[#2563EB]', 'ring-offset-2');
-      }, 1200);
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const target = document.getElementById(hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
-  }
-</script>
+  </script>
 </Layout>
