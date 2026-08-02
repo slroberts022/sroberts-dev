@@ -11,7 +11,7 @@
 
 <!-- Expanded terminal: positioned independently so it can be dragged freely -->
 <div id="term-panel" class="hidden fixed bottom-20 right-5 z-[999] flex-col w-[340px] h-[420px] min-w-[260px] min-h-[220px] bg-[#0F1117] rounded-xl shadow-2xl overflow-hidden border border-white/10 font-mono text-sm">
-  <div id="term-drag" class="flex items-center justify-between bg-[#1A1A2E] px-4 py-2.5 cursor-move">
+  <div id="term-drag" class="flex items-center justify-between bg-[#1A1A2E] px-4 py-2.5 cursor-move touch-none">
     <span class="text-white text-xs">guest@sroberts:~</span>
     <button id="term-close" class="text-white/60 hover:text-white text-xs">minimize</button>
   </div>
@@ -24,15 +24,15 @@
   </div>
 
   <!-- Resize handles: edges -->
-  <div data-resize="n" class="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize"></div>
-  <div data-resize="s" class="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize"></div>
-  <div data-resize="e" class="absolute right-0 top-2 bottom-2 w-1.5 cursor-ew-resize"></div>
-  <div data-resize="w" class="absolute left-0 top-2 bottom-2 w-1.5 cursor-ew-resize"></div>
+  <div data-resize="n" class="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize touch-none"></div>
+  <div data-resize="s" class="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize touch-none"></div>
+  <div data-resize="e" class="absolute right-0 top-2 bottom-2 w-1.5 cursor-ew-resize touch-none"></div>
+  <div data-resize="w" class="absolute left-0 top-2 bottom-2 w-1.5 cursor-ew-resize touch-none"></div>
   <!-- Resize handles: corners -->
-  <div data-resize="ne" class="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize"></div>
-  <div data-resize="nw" class="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize"></div>
-  <div data-resize="se" class="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize"></div>
-  <div data-resize="sw" class="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize"></div>
+  <div data-resize="ne" class="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize touch-none"></div>
+  <div data-resize="nw" class="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize touch-none"></div>
+  <div data-resize="se" class="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize touch-none"></div>
+  <div data-resize="sw" class="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize touch-none"></div>
 </div>
 
 <script>
@@ -146,6 +146,8 @@
           `region: ${data.region || 'unknown'}`,
           `city: ${data.city || 'unknown'}`,
           `timezone: ${data.timezone || 'unknown'}`,
+          `latitude: ${data.latitude || 'unknown'}`,
+          `longitude: ${data.longitude || 'unknown'}`,
         ].join('\n');
       } catch {
         return 'Could not reach location service.';
