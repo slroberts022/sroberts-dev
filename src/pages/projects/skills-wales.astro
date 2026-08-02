@@ -1,0 +1,153 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout>
+  <main class="min-h-screen bg-[#FAFAFA] flex flex-col">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA] px-8 py-6 flex justify-between items-center transition-shadow duration-300">
+      <div class="max-w-6xl mx-auto w-full flex justify-between items-center">
+        <a href="/" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center group-hover:bg-[#F97316] transition-colors duration-300">
+            <span class="font-mono text-white text-sm font-bold">SR</span>
+          </div>
+          <span class="font-mono text-[#1A1A2E] text-sm font-medium hidden md:block">sroberts.dev</span>
+        </a>
+        <div class="flex gap-8 text-sm font-medium text-[#6B7280]">
+          <a href="/about" class="hover:text-[#1A1A2E] transition-colors">About</a>
+          <a href="/projects" class="text-[#1A1A2E]">Projects</a>
+          <a href="/blog" class="hover:text-[#1A1A2E] transition-colors">Blog</a>
+          <a href="/#contact" class="hover:text-[#1A1A2E] transition-colors">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex-grow">
+
+      <!-- Back link + header -->
+      <section class="max-w-3xl mx-auto px-8 pt-40 pb-12">
+        <a href="/projects" class="font-mono text-[#F97316] text-sm tracking-wider hover:underline">← Back to projects</a>
+        <p class="font-mono text-[#F97316] text-sm mt-6 mb-2 tracking-wider">CTF</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-[#1A1A2E] mb-6 leading-tight">
+          Skills Wales Cyber Security Competition
+        </h1>
+        <p class="text-lg text-[#6B7280] leading-relaxed">
+          2nd place, national level — up against apprentices already working in the industry.
+        </p>
+      </section>
+
+      <!-- Headline stats -->
+      <section class="bg-[#1A1A2E] py-16">
+        <div class="max-w-3xl mx-auto px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <p class="text-[#F97316] text-3xl font-extrabold">2nd</p>
+            <p class="text-white text-sm mt-1">Place,<br/>National</p>
+          </div>
+          <div>
+            <p class="text-[#F97316] text-3xl font-extrabold">164</p>
+            <p class="text-white text-sm mt-1">Labs<br/>Completed</p>
+          </div>
+          <div>
+            <p class="text-[#F97316] text-3xl font-extrabold">15,680</p>
+            <p class="text-white text-sm mt-1">Points<br/>Earned</p>
+          </div>
+          <div>
+            <p class="text-[#F97316] text-3xl font-extrabold">8</p>
+            <p class="text-white text-sm mt-1">Weeks of<br/>Prep</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Narrative -->
+      <section class="max-w-3xl mx-auto px-8 py-16 space-y-6 text-[#6B7280] leading-relaxed">
+        <p>
+          My tutor Phil mentioned the college was looking for students to enter a
+          cyber security competition — that was enough to properly hook me. Once
+          I had access to Immersive Labs and could see myself on an organisational
+          leaderboard, I was away. Over roughly eight weeks between late September
+          and late November 2023, I worked through 164 labs, earning 15,680 points
+          along the way.
+        </p>
+        <p>
+          It stopped feeling like revision fairly quickly and I started rushing home after college just to log on and complete more labs. I ended up placing 2nd nationally, up
+          against apprentices already working in the industry - a feat i took great pride in- my effor had paid off, and more imprtantly- this was jusst the begining.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">What the prep actually covered</h2>
+        <p>
+          Rather than list all 164 labs, here's the rough shape of it - the
+          competition tested breadth as much as depth, so the prep ended up
+          touching almost every corner of the field:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose">
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">Linux & Windows Fundamentals</p>
+            <p class="text-sm text-[#9CA3AF]">CLI navigation, permissions, the registry, scheduled tasks, PowerShell</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">Web App Hacking</p>
+            <p class="text-sm text-[#9CA3AF]">XSS, SQL injection, directory traversal, Burp Suite</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">Digital Forensics & IR</p>
+            <p class="text-sm text-[#9CA3AF]">Timestomping, image analysis, PST parsing, IOC investigation</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">OSINT</p>
+            <p class="text-sm text-[#9CA3AF]">Shodan, EXIF data, archived sites, operational security</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">Networking & Protocols</p>
+            <p class="text-sm text-[#9CA3AF]">Wireshark, tcpdump, Nmap, ARP, DNS, packet analysis</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A2E] mb-1">Cryptography</p>
+            <p class="text-sm text-[#9CA3AF]">Hashing, symmetric/asymmetric encryption, the Enigma, Bombe & Typex machines</p>
+          </div>
+        </div>
+
+        <p class="pt-4">
+          A few labs stuck with me specifically: exploiting real CVEs like
+          BlueKeep and a UAC bypass, using pass-the-hash to move through an
+          Active Directory environment, and — the one I still bring up in
+          conversation — using pure OSINT to track down a simulated CEO's
+          password with nothing but publicly available information.
+        </p>
+      </section>
+
+      <!-- Download CTA -->
+      <section class="max-w-3xl mx-auto px-8 pb-24">
+        <div class="bg-white border border-[#E5E7EB] rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-[#1A1A2E] mb-1">See the full activity report</p>
+            <p class="text-sm text-[#6B7280]">All 164 labs, dated and scored, straight from Immersive Labs.</p>
+          </div>
+          <a href="/files/immersive-labs-activity-report.pdf" download class="bg-[#2563EB] text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">
+            Download PDF
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#1A1A2E] border-t border-white/10 py-6">
+      <div class="max-w-6xl mx-auto px-8 flex justify-between items-center">
+        <span class="font-mono text-[#6B7280] text-sm">© 2026 Scott Roberts</span>
+        <span class="font-mono text-[#6B7280] text-sm">sroberts.dev</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar?.classList.add('shadow-md');
+      } else {
+        navbar?.classList.remove('shadow-md');
+      }
+    });
+  </script>
+</Layout>

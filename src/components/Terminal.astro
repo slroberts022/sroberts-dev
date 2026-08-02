@@ -1,0 +1,439 @@
+---
+---
+<div id="term-widget" class="fixed bottom-5 right-5 z-[999] font-mono text-sm select-none">
+
+  <!-- Minimized pill -->
+  <button id="term-toggle" class="flex items-center gap-2 bg-[#1A1A2E] text-white px-4 py-3 rounded-full shadow-lg hover:bg-[#2563EB] transition-colors">
+    <span class="text-[#F97316]">&gt;</span>
+    <span>guest@sroberts:~$</span>
+  </button>
+</div>
+
+<!-- Expanded terminal: positioned independently so it can be dragged freely -->
+<div id="term-panel" class="hidden fixed bottom-20 right-5 z-[999] flex-col w-[340px] h-[420px] min-w-[260px] min-h-[220px] bg-[#0F1117] rounded-xl shadow-2xl overflow-hidden border border-white/10 font-mono text-sm">
+  <div id="term-drag" class="flex items-center justify-between bg-[#1A1A2E] px-4 py-2.5 cursor-move">
+    <span class="text-white text-xs">guest@sroberts:~</span>
+    <button id="term-close" class="text-white/60 hover:text-white text-xs">minimize</button>
+  </div>
+  <div id="term-output" class="flex-grow overflow-y-auto px-4 py-3 text-[#D1D5DB] text-xs leading-relaxed space-y-1"></div>
+  <div class="flex items-center gap-2 border-t border-white/10 px-4 py-2.5">
+    <span class="text-[#F97316]">$</span>
+    <input id="term-input" type="text" autocomplete="off" spellcheck="false"
+      class="flex-grow bg-transparent text-white text-xs outline-none placeholder:text-white/30"
+      placeholder="type 'help'" />
+  </div>
+
+  <!-- Resize handles: edges -->
+  <div data-resize="n" class="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize"></div>
+  <div data-resize="s" class="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize"></div>
+  <div data-resize="e" class="absolute right-0 top-2 bottom-2 w-1.5 cursor-ew-resize"></div>
+  <div data-resize="w" class="absolute left-0 top-2 bottom-2 w-1.5 cursor-ew-resize"></div>
+  <!-- Resize handles: corners -->
+  <div data-resize="ne" class="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize"></div>
+  <div data-resize="nw" class="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize"></div>
+  <div data-resize="se" class="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize"></div>
+  <div data-resize="sw" class="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize"></div>
+</div>
+
+<script>
+  type HistoryLine = { type: string; text: string };
+
+  const toggle = document.getElementById('term-toggle');
+  const panel = document.getElementById('term-panel');
+  const dragHandle = document.getElementById('term-drag');
+  const closeBtn = document.getElementById('term-close');
+  const output = document.getElementById('term-output');
+  const input = document.getElementById('term-input') as HTMLInputElement | null;
+
+  const STORAGE_OPEN = 'term-open';
+  const STORAGE_HISTORY = 'term-history';
+  const STORAGE_SIZE = 'term-size';
+  const STORAGE_POS = 'term-pos';
+  const MAX_HISTORY = 40;
+
+  // ---------- History ----------
+
+  function loadHistory(): HistoryLine[] {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_HISTORY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHistory(history: HistoryLine[]): void {
+    localStorage.setItem(STORAGE_HISTORY, JSON.stringify(history.slice(-MAX_HISTORY)));
+  }
+
+  function renderLine(type: string, text: string): void {
+    if (!output) return;
+    const row = document.createElement('div');
+    if (type === 'input') {
+      const prompt = document.createElement('span');
+      prompt.className = 'text-[#F97316]';
+      prompt.textContent = '$ ';
+      const value = document.createElement('span');
+      value.className = 'text-white';
+      value.textContent = text;
+      row.appendChild(prompt);
+      row.appendChild(value);
+    } else {
+      row.className = 'text-[#9CA3AF] whitespace-pre-wrap';
+      row.textContent = text;
+    }
+    output.appendChild(row);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function renderHistory(): void {
+    if (!output) return;
+    output.innerHTML = '';
+    const history = loadHistory();
+    if (history.length === 0) {
+      renderLine('output', "Type 'help' to see what this does.");
+      return;
+    }
+    history.forEach(line => renderLine(line.type, line.text));
+  }
+
+  function printLine(text: string, type: string = 'output', persist: boolean = true): void {
+    renderLine(type, text);
+    if (persist) {
+      const history = loadHistory();
+      history.push({ type, text });
+      saveHistory(history);
+    }
+  }
+
+  // ---------- Commands ----------
+
+  const COMMANDS: Record<string, () => string | null | Promise<string | null>> = {
+    help: () =>
+     `Commands: help, whoami, location, about, projects, blog, contact, ls, cd <page>, clear\nOr just ask something in plain English.`,
+    whoami: () => {
+      const ua = navigator.userAgent;
+      const platform = navigator.platform || 'unknown';
+      const lang = navigator.language;
+      const cores = navigator.hardwareConcurrency || 'unknown';
+      const screenRes = `${screen.width}x${screen.height}`;
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const isMobile = /Mobi|Android/i.test(ua);
+      return [
+        `device: ${isMobile ? 'mobile' : 'desktop'}`,
+        `platform: ${platform}`,
+        `screen: ${screenRes}`,
+        `language: ${lang}`,
+        `timezone: ${tz}`,
+        `cpu cores: ${cores}`,
+      ].join('\n');
+    },
+    about: () =>
+      `Final year BSc Applied Computing student, Skills Wales competitor, founder of CaerFortis. Type 'cd about' for the full story.`,
+    projects: () =>
+      `Skills Wales Competition, Social Media Study, VR Game, more on the way. Type 'cd projects' to see them all.`,
+    blog: () =>
+      `Writeups and thoughts on cyber security, coming soon. Type 'cd blog' to check.`,
+    contact: () =>
+      `scott@caerfortis.co.uk`,
+    ls: () =>
+      `about.astro  projects/  blog/  contact.md`,
+    location: async () => {
+      try {
+        const res = await fetch('https://sroberts-geo.caerfortis.workers.dev/');
+        const data = await res.json();
+        return [
+          `country: ${data.country || 'unknown'}`,
+          `region: ${data.region || 'unknown'}`,
+          `city: ${data.city || 'unknown'}`,
+          `timezone: ${data.timezone || 'unknown'}`,
+        ].join('\n');
+      } catch {
+        return 'Could not reach location service.';
+      }
+},
+    clear: () => {
+      localStorage.removeItem(STORAGE_HISTORY);
+      if (output) output.innerHTML = '';
+      return null;
+    },
+  };
+
+  type KeywordEntry = { keywords: string[]; response: string | (() => string) };
+
+  const KEYWORD_MAP: KeywordEntry[] = [
+    { keywords: ['who are you', 'what do you do', 'tell me about'], response: 'about' },
+    { keywords: ['contact', 'email', 'reach you', 'get in touch'], response: 'contact' },
+    { keywords: ['project', 'built', 'what have you made', 'your work'], response: 'projects' },
+    { keywords: ['blog', 'writeup', 'article'], response: 'blog' },
+    { keywords: ['sandwich'], response: () => "Make it yourself. I'm a portfolio, not a butler." },
+    { keywords: ['hello', 'hi there', 'hey'], response: () => "Hey! Type 'help' if you want the tour." },
+    { keywords: ['how are you', "how's it going", 'how you doing'], response: () => "Running fine, no memory leaks that I know of. You?" },
+    { keywords: ['thank you', 'thanks', 'cheers'], response: () => "Any time." },
+    { keywords: ['bye', 'goodbye', 'see ya'], response: () => "Cheers. I'll still be here if you come back." },
+    { keywords: ['are you real', 'are you ai', 'are you a bot', 'are you chatgpt'], response: () => "Not real AI — just keyword matching under the hood- you're so predictable :P" },
+    { keywords: ['your name', 'who is scott', 'who made you'], response: () => "Scott built me. Type 'about' for the actual bio." },
+    { keywords: ['joke', 'funny'], response: () => "There are 10 types of people: those who understand binary, and those who don't." },
+    { keywords: ['how old', 'your age'], response: () => "I was born the moment someone typed 'help' for the first time. So, young." },
+    { keywords: ['weather'], response: () => "I'm a terminal, not a forecast. Try a window — the other kind." },
+    { keywords: ['nice site', 'cool site', 'love this', 'nice terminal'], response: () => "Cheers, took a while to get right." },
+  ];
+
+  const ROUTES: Record<string, string> = {
+    about: '/about',
+    projects: '/projects',
+    blog: '/blog',
+    home: '/',
+    contact: '/#contact',
+  };
+function levenshtein(a: string, b: string): number {
+  const dp: number[][] = Array.from({ length: a.length + 1 }, (_, i) =>
+    Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function closestCommand(word: string): string | null {
+  const allCommands = Object.keys(COMMANDS);
+  let best: string | null = null;
+  let bestDist = 3;
+  for (const cmd of allCommands) {
+    const dist = levenshtein(word, cmd);
+    if (dist < bestDist) {
+      best = cmd;
+      bestDist = dist;
+    }
+  }
+  return best;
+}
+  async function handleCommand(raw: string): Promise<void> {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+
+    printLine(trimmed, 'input');
+
+    const lower = trimmed.toLowerCase().replace(/[?!.,]/g, '').trim();
+
+    if (lower.startsWith('cd ')) {
+      const dest = lower.replace('cd ', '').replace(/[\/.]/g, '').trim();
+      const route = ROUTES[dest];
+      if (route) {
+        printLine(`navigating to ${route}...`);
+        setTimeout(() => (window.location.href = route), 400);
+      } else {
+        printLine(`no such page: ${dest}`);
+      }
+      return;
+    }
+
+  if (COMMANDS[lower]) {
+    const result = await COMMANDS[lower]();
+    if (result) printLine(result);
+    return;
+  }
+
+    for (const entry of KEYWORD_MAP) {
+      if (entry.keywords.some(k => lower.includes(k))) {
+        const raw = typeof entry.response === 'function' ? entry.response() : COMMANDS[entry.response]?.();
+        const res = await raw;
+        if (res) printLine(res);
+        return;
+      }
+    }
+
+  const suggestion = closestCommand(lower);
+    if (suggestion) {
+      printLine(`command not found: ${trimmed}. Did you mean '${suggestion}'?`);
+    } else {
+      printLine(`command not found: ${trimmed}. Type 'help' for options.`);
+    }
+  }
+
+  // ---------- Open / close ----------
+
+  function openPanel(): void {
+    if (!panel || !toggle) return;
+    panel.classList.remove('hidden');
+    panel.classList.add('flex');
+    toggle.classList.add('hidden');
+    localStorage.setItem(STORAGE_OPEN, 'true');
+    input?.focus();
+    renderHistory();
+  }
+
+  function closePanel(): void {
+    if (!panel || !toggle) return;
+    panel.classList.add('hidden');
+    panel.classList.remove('flex');
+    toggle.classList.remove('hidden');
+    localStorage.setItem(STORAGE_OPEN, 'false');
+  }
+
+  toggle?.addEventListener('click', openPanel);
+  closeBtn?.addEventListener('click', closePanel);
+
+  input?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && input) {
+      handleCommand(input.value);
+      input.value = '';
+    }
+  });
+
+  // ---------- Restore size & position ----------
+
+  function applySavedSize(): void {
+    if (!panel) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_SIZE) || 'null');
+      if (saved?.width && saved?.height) {
+        panel.style.width = `${saved.width}px`;
+        panel.style.height = `${saved.height}px`;
+      }
+    } catch {}
+  }
+
+  function applySavedPosition(): void {
+    if (!panel) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_POS) || 'null');
+      if (saved?.left != null && saved?.top != null) {
+        panel.style.left = `${saved.left}px`;
+        panel.style.top = `${saved.top}px`;
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      }
+    } catch {}
+  }
+
+  applySavedSize();
+  applySavedPosition();
+
+  if (localStorage.getItem(STORAGE_OPEN) === 'true') {
+    openPanel();
+  }
+
+  // ---------- Resize persistence ----------
+
+  if (panel && 'ResizeObserver' in window) {
+    const observer = new ResizeObserver(() => {
+      if (!panel) return;
+      const rect = panel.getBoundingClientRect();
+      localStorage.setItem(STORAGE_SIZE, JSON.stringify({ width: rect.width, height: rect.height }));
+    });
+    observer.observe(panel);
+  }
+
+  // ---------- Dragging ----------
+
+  let dragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  dragHandle?.addEventListener('pointerdown', (e: PointerEvent) => {
+    if (!panel) return;
+    if (e.target === closeBtn) return;
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    dragHandle.setPointerCapture(e.pointerId);
+  });
+
+  dragHandle?.addEventListener('pointermove', (e: PointerEvent) => {
+    if (!dragging || !panel) return;
+    const maxLeft = window.innerWidth - panel.offsetWidth;
+    const maxTop = window.innerHeight - panel.offsetHeight;
+    const newLeft = Math.min(Math.max(0, e.clientX - dragOffsetX), Math.max(0, maxLeft));
+    const newTop = Math.min(Math.max(0, e.clientY - dragOffsetY), Math.max(0, maxTop));
+    panel.style.left = `${newLeft}px`;
+    panel.style.top = `${newTop}px`;
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+  });
+
+  dragHandle?.addEventListener('pointerup', (e: PointerEvent) => {
+    if (!dragging || !panel) return;
+    dragging = false;
+    dragHandle.releasePointerCapture(e.pointerId);
+    const rect = panel.getBoundingClientRect();
+    localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+  });
+
+  // ---------- Multi-direction resize ----------
+
+  const MIN_WIDTH = 260;
+  const MIN_HEIGHT = 220;
+
+  let resizing = false;
+  let resizeDir = '';
+  let startX = 0;
+  let startY = 0;
+  let startRect: DOMRect | null = null;
+
+  function saveSizeAndPosition(): void {
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    localStorage.setItem(STORAGE_SIZE, JSON.stringify({ width: rect.width, height: rect.height }));
+    localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-resize]').forEach(handle => {
+    handle.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (!panel) return;
+      resizing = true;
+      resizeDir = handle.dataset.resize || '';
+      startX = e.clientX;
+      startY = e.clientY;
+      startRect = panel.getBoundingClientRect();
+      handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    handle.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!resizing || !panel || !startRect) return;
+
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      let newWidth = startRect.width;
+      let newHeight = startRect.height;
+      let newLeft = startRect.left;
+      let newTop = startRect.top;
+
+      if (resizeDir.includes('e')) {
+        newWidth = Math.max(MIN_WIDTH, startRect.width + deltaX);
+      }
+      if (resizeDir.includes('w')) {
+        newWidth = Math.max(MIN_WIDTH, startRect.width - deltaX);
+        newLeft = startRect.left + (startRect.width - newWidth);
+      }
+      if (resizeDir.includes('s')) {
+        newHeight = Math.max(MIN_HEIGHT, startRect.height + deltaY);
+      }
+      if (resizeDir.includes('n')) {
+        newHeight = Math.max(MIN_HEIGHT, startRect.height - deltaY);
+        newTop = startRect.top + (startRect.height - newHeight);
+      }
+
+      panel.style.width = `${newWidth}px`;
+      panel.style.height = `${newHeight}px`;
+      panel.style.left = `${newLeft}px`;
+      panel.style.top = `${newTop}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    });
+
+    handle.addEventListener('pointerup', (e: PointerEvent) => {
+      if (!resizing) return;
+      resizing = false;
+      handle.releasePointerCapture(e.pointerId);
+      saveSizeAndPosition();
+    });
+  });
+</script>

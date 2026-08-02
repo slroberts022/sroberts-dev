@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+
+import Terminal from '../components/Terminal.astro';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -14,5 +16,17 @@ import '../styles/global.css';
   </head>
   <body class="bg-[#FAFAFA] text-[#1A1A2E] font-sans antialiased">
     <slot />
+  <Terminal />
+    <script>
+      console.log("%cIf you're reading this, you're my kind of visitor ;P", "font-size: 16px; color: #F97316;");
+    </script>
+
+    <script>
+      const originalTitle = document.title;
+      document.addEventListener('visibilitychange', () => {
+        document.title = document.hidden ? 'Come back! 👋' : originalTitle;
+      });
+    </script>
+
   </body>
 </html>

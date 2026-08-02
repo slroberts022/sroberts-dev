@@ -34,7 +34,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <p class="text-lg text-[#6B7280] max-w-2xl mb-10 leading-relaxed">
         Final year BSc Applied Computing student at USW with a passion for cyber security, 
-        penetration testing and building things that matter. Based in Caerphilly, Wales.
+        penetration testing and CTF. Based in Caerphilly, Wales.
       </p>
       <div class="flex gap-4">
         <a href="#projects" class="bg-[#2563EB] text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
@@ -265,6 +265,7 @@ import Layout from '../layouts/Layout.astro';
     const el = document.getElementById('typewriter');
 
     function type() {
+      if (!el) return;
       const current = roles[roleIndex];
       if (!deleting) {
         el.textContent = current.slice(0, charIndex + 1);
@@ -289,9 +290,9 @@ import Layout from '../layouts/Layout.astro';
 	const navbar = document.getElementById('navbar');
 	window.addEventListener('scroll', () => {
   		if (window.scrollY > 10) {
-    		navbar.classList.add('shadow-md');
+    		navbar?.classList.add('shadow-md');
   		} else {
-    		navbar.classList.remove('shadow-md');
+    		navbar?.classList.remove('shadow-md');
  		}
 	});
   </script>
