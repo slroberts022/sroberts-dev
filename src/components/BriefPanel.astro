@@ -1,0 +1,225 @@
+---
+---
+<!-- Minimized bubble, hidden until the brief has ever been opened -->
+<button id="brief-toggle" class="hidden fixed bottom-24 right-5 z-[999] items-center gap-2 bg-[#2563EB] text-white px-4 py-3 rounded-full shadow-lg hover:bg-[#F97316] transition-colors font-mono text-sm">
+  <span>📋</span>
+  <span>brief</span>
+</button>
+
+<div id="brief-panel" class="hidden fixed top-24 left-5 z-[998] flex-col w-[320px] h-[380px] min-w-[240px] min-h-[200px] bg-white rounded-xl shadow-2xl overflow-hidden border border-[#E5E7EB] font-sans text-sm">
+  <div id="brief-drag" class="flex items-center justify-between bg-[#1A1A2E] px-4 py-2.5 cursor-move touch-none">
+    <span class="text-white text-xs font-mono">Brief</span>
+    <button id="brief-close" class="text-white/60 hover:text-white text-xs">minimize</button>
+  </div>
+  <div id="brief-content" class="flex-grow overflow-y-auto px-4 py-3 text-[#1A1A2E] text-sm"></div>
+
+  <!-- Resize handles -->
+  <div data-brief-resize="n" class="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize touch-none"></div>
+  <div data-brief-resize="s" class="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize touch-none"></div>
+  <div data-brief-resize="e" class="absolute right-0 top-2 bottom-2 w-1.5 cursor-ew-resize touch-none"></div>
+  <div data-brief-resize="w" class="absolute left-0 top-2 bottom-2 w-1.5 cursor-ew-resize touch-none"></div>
+  <div data-brief-resize="ne" class="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize touch-none"></div>
+  <div data-brief-resize="nw" class="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize touch-none"></div>
+  <div data-brief-resize="se" class="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize touch-none"></div>
+  <div data-brief-resize="sw" class="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize touch-none"></div>
+</div>
+
+<script>
+  const panel = document.getElementById('brief-panel');
+  const briefToggle = document.getElementById('brief-toggle');
+  const dragHandle = document.getElementById('brief-drag');
+  const closeBtn = document.getElementById('brief-close');
+  const content = document.getElementById('brief-content');
+
+  const STORAGE_OPEN = 'brief-open';
+  const STORAGE_SIZE = 'brief-size';
+  const STORAGE_POS = 'brief-pos';
+
+  let hasContent = false;
+
+  function renderEntries(entries: string[]): void {
+    if (!content) return;
+    content.innerHTML = '';
+    entries.forEach(entry => {
+      const p = document.createElement('p');
+      p.className = 'mb-4 last:mb-0 leading-relaxed';
+      p.textContent = entry;
+      content.appendChild(p);
+    });
+  }
+
+  function openPanel(): void {
+    if (!panel) return;
+    panel.classList.remove('hidden');
+    panel.classList.add('flex');
+    briefToggle?.classList.add('hidden');
+    localStorage.setItem(STORAGE_OPEN, 'true');
+  }
+
+  function minimizePanel(): void {
+    if (!panel) return;
+    panel.classList.add('hidden');
+    panel.classList.remove('flex');
+    localStorage.setItem(STORAGE_OPEN, 'false');
+    if (hasContent) {
+      briefToggle?.classList.remove('hidden');
+      briefToggle?.classList.add('flex');
+    }
+  }
+
+  closeBtn?.addEventListener('click', minimizePanel);
+  briefToggle?.addEventListener('click', openPanel);
+
+  // Listen for the terminal's CTF brief updates
+  window.addEventListener('ctf-brief', (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    if (detail?.entries) {
+      renderEntries(detail.entries);
+      hasContent = true;
+    }
+    if (detail?.forceOpen) {
+      openPanel();
+    } else if (panel?.classList.contains('hidden')) {
+      // Content updated while minimized — show the bubble as available
+      briefToggle?.classList.remove('hidden');
+      briefToggle?.classList.add('flex');
+    }
+  });
+
+  // ---------- Restore size & position ----------
+
+  function applySavedSize(): void {
+    if (!panel) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_SIZE) || 'null');
+      if (saved?.width && saved?.height) {
+        panel.style.width = `${saved.width}px`;
+        panel.style.height = `${saved.height}px`;
+      }
+    } catch {}
+  }
+
+  function applySavedPosition(): void {
+    if (!panel) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_POS) || 'null');
+      if (saved?.left != null && saved?.top != null) {
+        panel.style.left = `${saved.left}px`;
+        panel.style.top = `${saved.top}px`;
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      }
+    } catch {}
+  }
+
+  applySavedSize();
+  applySavedPosition();
+
+  if (panel && 'ResizeObserver' in window) {
+    const observer = new ResizeObserver(() => {
+      if (!panel) return;
+      const rect = panel.getBoundingClientRect();
+      localStorage.setItem(STORAGE_SIZE, JSON.stringify({ width: rect.width, height: rect.height }));
+    });
+    observer.observe(panel);
+  }
+
+  // ---------- Dragging ----------
+
+  let dragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  dragHandle?.addEventListener('pointerdown', (e: PointerEvent) => {
+    if (!panel) return;
+    if (e.target === closeBtn) return;
+    dragging = true;
+    const rect = panel.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+  });
+
+  // ---------- Resize ----------
+
+  const MIN_WIDTH = 240;
+  const MIN_HEIGHT = 200;
+
+  let resizing = false;
+  let resizeDir = '';
+  let startX = 0;
+  let startY = 0;
+  let startRect: DOMRect | null = null;
+
+  function saveSizeAndPosition(): void {
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    localStorage.setItem(STORAGE_SIZE, JSON.stringify({ width: rect.width, height: rect.height }));
+    localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-brief-resize]').forEach(handle => {
+    handle.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (!panel) return;
+      resizing = true;
+      resizeDir = handle.dataset.briefResize || '';
+      startX = e.clientX;
+      startY = e.clientY;
+      startRect = panel.getBoundingClientRect();
+      e.preventDefault();
+    });
+  });
+
+  document.addEventListener('pointermove', (e: PointerEvent) => {
+    if (dragging && panel) {
+      const maxLeft = window.innerWidth - panel.offsetWidth;
+      const maxTop = window.innerHeight - panel.offsetHeight;
+      const newLeft = Math.min(Math.max(0, e.clientX - dragOffsetX), Math.max(0, maxLeft));
+      const newTop = Math.min(Math.max(0, e.clientY - dragOffsetY), Math.max(0, maxTop));
+      panel.style.left = `${newLeft}px`;
+      panel.style.top = `${newTop}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      return;
+    }
+
+    if (resizing && panel && startRect) {
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      let newWidth = startRect.width;
+      let newHeight = startRect.height;
+      let newLeft = startRect.left;
+      let newTop = startRect.top;
+
+      if (resizeDir.includes('e')) newWidth = Math.max(MIN_WIDTH, startRect.width + deltaX);
+      if (resizeDir.includes('w')) {
+        newWidth = Math.max(MIN_WIDTH, startRect.width - deltaX);
+        newLeft = startRect.left + (startRect.width - newWidth);
+      }
+      if (resizeDir.includes('s')) newHeight = Math.max(MIN_HEIGHT, startRect.height + deltaY);
+      if (resizeDir.includes('n')) {
+        newHeight = Math.max(MIN_HEIGHT, startRect.height - deltaY);
+        newTop = startRect.top + (startRect.height - newHeight);
+      }
+
+      panel.style.width = `${newWidth}px`;
+      panel.style.height = `${newHeight}px`;
+      panel.style.left = `${newLeft}px`;
+      panel.style.top = `${newTop}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+    }
+  });
+
+  document.addEventListener('pointerup', () => {
+    if (dragging && panel) {
+      dragging = false;
+      const rect = panel.getBoundingClientRect();
+      localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+    }
+    if (resizing) {
+      resizing = false;
+      saveSizeAndPosition();
+    }
+  });
+</script>

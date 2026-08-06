@@ -1,0 +1,208 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+<Layout>
+  <main class="min-h-screen bg-[#FAFAFA] flex flex-col">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA] px-8 py-6 flex justify-between items-center transition-shadow duration-300">
+      <div class="max-w-6xl mx-auto w-full flex justify-between items-center">
+        <a href="/" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center group-hover:bg-[#F97316] transition-colors duration-300">
+            <span class="font-mono text-white text-sm font-bold">SR</span>
+          </div>
+          <span class="font-mono text-[#1A1A2E] text-sm font-medium hidden md:block">sroberts.dev</span>
+        </a>
+        <div class="flex gap-8 text-sm font-medium text-[#6B7280]">
+          <a href="/about" class="hover:text-[#1A1A2E] transition-colors">About</a>
+          <a href="/projects" class="text-[#1A1A2E]">Projects</a>
+          <a href="/blog" class="hover:text-[#1A1A2E] transition-colors">Blog</a>
+          <a href="/#contact" class="hover:text-[#1A1A2E] transition-colors">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex-grow">
+
+      <!-- Back link + header -->
+      <section class="max-w-3xl mx-auto px-8 pt-40 pb-12">
+        <a href="/projects/this-website" class="font-mono text-[#F97316] text-sm tracking-wider hover:underline">← Back to This Website</a>
+        <p class="font-mono text-[#F97316] text-sm mt-6 mb-2 tracking-wider">Build Log</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-[#1A1A2E] mb-6 leading-tight">
+          Building the terminal widget
+        </h1>
+        <p class="text-lg text-[#6B7280] leading-relaxed">
+          A draggable, resizable, persistent dummy terminal - with keyword
+          matching, typo suggestions, and a self-built Cloudflare Worker
+          for geolocation.
+        </p>
+      </section>
+
+      <!-- Article -->
+      <article class="max-w-3xl mx-auto px-8 pb-24 space-y-6 text-[#6B7280] leading-relaxed">
+        <p>
+          My inital idea was much more simple than what this project has developed into - a minimized chat-style bubble in the
+          corner that expands into something more interesting than the standard chatbot. It ended up being one of the most involved features on the
+          whole site, mostly because each addition sparked more intrest, and most importantly, I was enjoying testing it.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">The core: a fake command line</h2>
+        <p>
+          At its simplest, the terminal is a text input and an output area,
+          with a function that matches whatever you type against a list of
+          known commands - <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">whoami</code>,
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">help</code>,
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">about</code>,
+          and so on.
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">cd about</code> and
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">cd projects</code> actually
+          navigate the site - the terminal isn't just decorative, it's a real
+          (if slightly silly) way to navigate, interact with and extract information from the site.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">Making it feel less rigid</h2>
+        <p>
+          Exact commands only get you so far - i wanted to make the experience more natural to guests, allowing them to type more than just
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm"> "contact"</code> and instead
+          accepting phrases like "how do I get in touch?" So alongside the command
+          list, there's a keyword-matching layer that catches natural
+          phrasing and routes it to the same responses. It's not AI -
+          the terminal makes a point of telling you itself if you ask - just pattern matching
+          against a list of phrases. The honest framing felt natural as although I designed and am continueing to design the terminal to be robust
+          any catch amny phrases, it's good to acknowlee there will be many inputs that will slip through the cracks.
+        </p>
+        <p>
+          Typos get acknowleged too: a Levenshtein-distance check compares
+          whatever you typed against the real command list and suggests the
+          closest match, the same "did you mean?" trick that Git uses.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">Drag, resize, and the state problem</h2>
+        <p>
+          Making it draggable meant learning the Pointer Events API - one set
+          of event handlers that works for mouse, touch, and stylus input
+          alike, rather than writing separate logic for desktop and mobile.
+          Resizing works from all eight edges and corners, not just the
+          browser-default bottom-right - each of the eight handles
+          calculates a different combination of width, height, and position
+          depending on which direction it's being dragged from.
+        </p>
+        <p>
+          Mobile needed one extra fix: by default, a browser treats any
+          finger-drag on a page as though the user is trying to scroll, which fought
+          with dragging and resizing. Setting
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm"> touch-action: none</code> on
+          the drag handle and resize strips tells the browser to leave those
+          specific areas alone.
+        </p>
+        <p>
+          The trickiest part wasn't the dragging itself - it was making the
+          terminal <em>remember</em> where it was. Astro builds a genuinely
+          multi-page site, not a single-page app, so every navigation is a
+          real page load with no memory of what happened on the last page.
+          The fix was <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm"> localStorage</code> -
+          position, size, open/closed state, and conversation history all get
+          written there on every change, and read back in on every page load.
+          Open the terminal, drag it somewhere, cd to another
+          page, and it reopens exactly where you left it.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">A bug that only showed up after closing the tab</h2>
+        <p>
+          The original drag and resize code relied on
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">setPointerCapture</code>,
+          which locks pointer events to a specific element even if the
+          cursor moves off it. It worked fine - until closing a tab and
+          reopening it with Ctrl+Shift+T, at which point dragging
+          stopped working whilst resizing and minimising remained fine.
+        </p>
+        <p>
+          The fix was to stop listening on the small drag handle and resize
+          strips altogether, and instead listen for
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">pointermove</code> and
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">pointerup</code> on
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">document</code> instead
+          - the standard, more resilient pattern for drag implementations.
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">pointerdown</code> still
+          starts on the specific handle, so you still have to grab the right
+          spot to begin, but once a drag or resize starts, it keeps tracking
+          the pointer regardless of capture, browser quirks, or how fast the
+          cursor moves.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">Building the geolocation command</h2>
+        <p>
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">location</code> shows
+          country, region, city, timezone, and coordinates - but instead of
+          calling a third-party geolocation API, it calls a small Cloudflare
+          Worker written and deployed from scratch. Every request to this
+          site already passes through Cloudflare's network, and Cloudflare
+          already attaches location data to each request internally as part
+          of how it routes traffic. The Worker just reads that data
+          (<code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">request.cf</code>)
+          and hands back a small JSON response - no external database, no
+          API key, no raw IP address ever leaving Cloudflare's network.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">A neofetch-style whoami</h2>
+        <p>
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">whoami</code> pulls
+          real browser data - screen resolution, timezone, CPU core count,
+          light/dark mode preference - directly from JavaScript's built-in
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">navigator</code> object,
+          nothing sent anywhere, nothing stored. It's formatted to look akin to
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">neofetch</code>,
+          a Linux cli tool that pairs a small ASCII logo with system info -
+          even down to swapping in a different, appropriately-sized logo
+          depending on how wide the current size of terminal.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">Arrow-key history + a bug worth mentioning</h2>
+        <p>
+          Pressing ↑ and ↓ cycles back through previously typed commands, the
+          same recall behaviouryou'll find on a regular shell - including restoring
+          whatever you were mid-typing if you press ↓ back past the most
+          recent command.
+        </p>
+        <p>
+          That restore logic is also where a bug turned up: pressing
+          ↓ while typing something new, without pressing ↑ first, wiped
+          the text out entirely. The fix ended up being a single guard clause
+          - if you're not actually browsing history, ↓ does nothing at all,
+          rather than trying to "restore" a draft that wasn't captured. 
+          Small bugwith a single-line fix, but the kind of thing
+          that's only seemed obvious once you've actually used the feature rather
+          than whilst building it.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">What's next</h2>
+        <p>
+          Plan to add Pinch-to-zoom resizing for mobile next - tracking two
+          simultaneous touch points instead of one, different logic from the single-pointer dragging thats curren=nrtly used. Longer
+          term, I'd liike to pursue a bigger and better CTF section, I plan to make multiple scenarios- 
+          or potentially one big overarching one, each new ctf buillding upon the last.
+        </p>
+      </article>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#1A1A2E] border-t border-white/10 py-6">
+      <div class="max-w-6xl mx-auto px-8 flex justify-between items-center">
+        <span class="font-mono text-[#6B7280] text-sm">© 2026 Scott Roberts</span>
+        <span class="font-mono text-[#6B7280] text-sm">sroberts.dev</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar?.classList.add('shadow-md');
+      } else {
+        navbar?.classList.remove('shadow-md');
+      }
+    });
+  </script>
+</Layout>

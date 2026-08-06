@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../../layouts/Layout.astro';
 ---
 <Layout>
   <main class="min-h-screen bg-[#FAFAFA] flex flex-col">
@@ -15,27 +15,43 @@ import Layout from '../layouts/Layout.astro';
         </a>
         <div class="flex gap-8 text-sm font-medium text-[#6B7280]">
           <a href="/about" class="hover:text-[#1A1A2E] transition-colors">About</a>
-          <a href="/projects" class="hover:text-[#1A1A2E] transition-colors">Projects</a>
+          <a href="/projects" class="text-[#1A1A2E]">Projects</a>
           <a href="/blog" class="hover:text-[#1A1A2E] transition-colors">Blog</a>
           <a href="/#contact" class="hover:text-[#1A1A2E] transition-colors">Contact</a>
         </div>
       </div>
     </nav>
 
-    <div class="flex-grow flex items-center justify-center px-8">
-      <div class="max-w-lg text-center">
-        <p class="font-mono text-[#F97316] text-sm tracking-wider mb-4">404</p>
+    <div class="flex-grow">
+
+      <!-- Back link + header -->
+      <section class="max-w-3xl mx-auto px-8 pt-40 pb-12">
+        <a href="/projects" class="font-mono text-[#F97316] text-sm tracking-wider hover:underline">← Back to projects</a>
+        <p class="font-mono text-[#F97316] text-sm mt-6 mb-2 tracking-wider">Meta</p>
         <h1 class="text-4xl md:text-5xl font-extrabold text-[#1A1A2E] mb-6 leading-tight">
-          This page doesn't exist.
+          This Website
         </h1>
-        <p class="text-lg text-[#6B7280] leading-relaxed mb-10">
-          Kind of like my CPTS cert- for now. Give it a few months, and check
-          the URL in the meantime. :P
+        <p class="text-lg text-[#6B7280] leading-relaxed">
+          Writeups on how sroberts.dev itself is built - the features, the
+          decisions, and the bits that broke along the way.
         </p>
-        <a href="/" class="inline-block bg-[#2563EB] text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-          Back to the actual site
+      </section>
+
+      <!-- Article list -->
+      <section class="max-w-3xl mx-auto px-8 pb-24 space-y-4">
+        <a href="/projects/this-website/the-terminal" class="block bg-white border border-[#E5E7EB] rounded-xl p-6 hover:border-[#2563EB] transition-colors">
+          <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Build Log</span>
+          <h2 class="font-bold text-[#1A1A2E] text-xl mt-3 mb-2">Building the terminal widget</h2>
+          <p class="text-sm text-[#6B7280]">A draggable, resizable, persistent fake terminal with keyword matching, typo suggestions, and a self-built Cloudflare Worker for geolocation.</p>
         </a>
-      </div>
+
+        <a href="/projects/this-website/security-hardening" class="block bg-white border border-[#E5E7EB] rounded-xl p-6 hover:border-[#2563EB] transition-colors">
+          <span class="bg-[#EFF6FF] text-[#2563EB] text-xs font-mono px-2 py-1 rounded">Build Log</span>
+          <h2 class="font-bold text-[#1A1A2E] text-xl mt-3 mb-2">Hardening this site's security</h2>
+          <p class="text-sm text-[#6B7280]">Working through Cloudflare's security report, header by header - updated as more gets done.</p>
+        </a>
+      </section>
+
     </div>
 
     <!-- Footer -->

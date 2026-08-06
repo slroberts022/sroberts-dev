@@ -2,6 +2,7 @@
 import '../styles/global.css';
 
 import Terminal from '../components/Terminal.astro';
+import BriefPanel from '../components/BriefPanel.astro';
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -17,8 +18,9 @@ import Terminal from '../components/Terminal.astro';
   <body class="bg-[#FAFAFA] text-[#1A1A2E] font-sans antialiased">
     <slot />
   <Terminal />
+  <BriefPanel />
     <script>
-      console.log("%cIf you're reading this, you're my kind of visitor ;P", "font-size: 16px; color: #F97316;");
+      console.log("%cWhat are you doing here?! Ah well... let me know if you find anything interesting :P", "font-size: 16px; color: #F97316;");
     </script>
 
     <script>

@@ -1,0 +1,141 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+<Layout>
+  <main class="min-h-screen bg-[#FAFAFA] flex flex-col">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-[#FAFAFA] px-8 py-6 flex justify-between items-center transition-shadow duration-300">
+      <div class="max-w-6xl mx-auto w-full flex justify-between items-center">
+        <a href="/" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center group-hover:bg-[#F97316] transition-colors duration-300">
+            <span class="font-mono text-white text-sm font-bold">SR</span>
+          </div>
+          <span class="font-mono text-[#1A1A2E] text-sm font-medium hidden md:block">sroberts.dev</span>
+        </a>
+        <div class="flex gap-8 text-sm font-medium text-[#6B7280]">
+          <a href="/about" class="hover:text-[#1A1A2E] transition-colors">About</a>
+          <a href="/projects" class="text-[#1A1A2E]">Projects</a>
+          <a href="/blog" class="hover:text-[#1A1A2E] transition-colors">Blog</a>
+          <a href="/#contact" class="hover:text-[#1A1A2E] transition-colors">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex-grow">
+
+      <!-- Back link + header -->
+      <section class="max-w-3xl mx-auto px-8 pt-40 pb-12">
+        <a href="/projects/this-website" class="font-mono text-[#F97316] text-sm tracking-wider hover:underline">← Back to This Website</a>
+        <p class="font-mono text-[#F97316] text-sm mt-6 mb-2 tracking-wider">Build Log</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-[#1A1A2E] mb-6 leading-tight">
+          Hardening this site's security
+        </h1>
+        <p class="text-lg text-[#6B7280] leading-relaxed">
+          Working through Cloudflare's Security Insights report for
+          sroberts.dev - what each finding actually means, and what I
+          decided to do about it.
+        </p>
+      </section>
+
+      <!-- Article -->
+      <article class="max-w-3xl mx-auto px-8 pb-24 space-y-6 text-[#6B7280] leading-relaxed">
+        <p>
+          This is genuinely a personal portfolio site,
+          there's no login form, no user data, nothing especially valuable
+          to protect. Even so, I believe that these things matter regardless of
+          scale, so it felt worth doing properly rather than skipping it, even if the only value gained is exerience.
+        </p>
+        <p>
+          <em>This page will get updated as I work through the rest of the
+          report and beyond.</em>
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">HTTP Strict Transport Security (HSTS)</h2>
+        <p>
+          Without HSTS, there's a brief window on someone's first visit
+          where a man-in-the-middle attacker on an insecure network - public
+          wifi etc, - could intercept the connection and downgrade it to
+          plain HTTP before the browser knows to insist on encryption. HSTS
+          tells browsers "always use HTTPS for this site, no exceptions,"
+          closing that window entirely.
+        </p>
+        <p>
+          The catch is that it's a one-way commitment for however long you
+          set the max-age. Cloudflare is pretty proactive in warning about this, stressing the importance:
+          if you ever disable HTTPS, or move to a different host that
+          doesn't support it, visitors who've been to your site recently get
+          locked out until either that host adds HTTPS or the max-age window
+          passes. Since sroberts.dev is on Cloudflare Pages, which serves
+          HTTPS automatically, and that I don't expect to be moving, this isn't really
+          a practical risk - but it's worth understanding before
+          clicking enable, rather than skipping the warning.
+        </p>
+        <p>
+          Configured with a 6 month max-age, subdomains included, preload
+          left off for now (this will submit the domain to a permanent,
+          hard to reverse browser-level list - worth doing later once things
+          have been stable for a while).
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">X-Content-Type-Options: nosniff</h2>
+        <p>
+          Some browsers try to be "helpful" by guessing a file's type
+          from its content, rather than trusting what the server explicitly
+          declares. "MIME-sniffing" behaviour has historically been
+          exploited - disguising a malicious script as an innocent file type
+          and letting a sniffing browser execute it based on its own guess
+          rather than the declared type.
+        </p>
+        <p>
+          The <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">nosniff</code> header
+          tells the browser to trust the declared type and stop guessing -
+          closing off that attack surface with zero functional cost or
+          downside.
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">A few smaller wins</h2>
+        <p>
+          Alongside HSTS specifically, a handful of other SSL/TLS settings
+          got switched on at the same time: <strong>Always Use HTTPS</strong> (redirects
+          stray HTTP requests), <strong>TLS 1.3</strong> (the current, most secure
+          version), a <strong>minimum TLS version of 1.2</strong> (blocking
+          outdated, insecure connection attempts), and <strong>Automatic
+          HTTPS Rewrites</strong> (a safety net that'll catch any accidental HTTP links
+          in the site's own content).
+        </p>
+
+        <h2 class="text-2xl font-bold text-[#1A1A2E] pt-6">Still on the list</h2>
+        <p>
+          The rest of the report, not yet configured: a
+          <code class="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-sm">security.txt</code> file
+          (a standardised way for researchers to report vulnerabilities
+          responsibly), Bot Fight Mode (challenging automated bot traffic),
+          and two AI-crawler related toggles that are more of a values
+          decision than a security fix. Updates to follow as each one gets
+          done.
+        </p>
+      </article>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#1A1A2E] border-t border-white/10 py-6">
+      <div class="max-w-6xl mx-auto px-8 flex justify-between items-center">
+        <span class="font-mono text-[#6B7280] text-sm">© 2026 Scott Roberts</span>
+        <span class="font-mono text-[#6B7280] text-sm">sroberts.dev</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar?.classList.add('shadow-md');
+      } else {
+        navbar?.classList.remove('shadow-md');
+      }
+    });
+  </script>
+</Layout>

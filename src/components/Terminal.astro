@@ -118,14 +118,42 @@
       const screenRes = `${screen.width}x${screen.height}`;
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const isMobile = /Mobi|Android/i.test(ua);
-      return [
-        `device: ${isMobile ? 'mobile' : 'desktop'}`,
-        `platform: ${platform}`,
-        `screen: ${screenRes}`,
-        `language: ${lang}`,
-        `timezone: ${tz}`,
-        `cpu cores: ${cores}`,
-      ].join('\n');
+      const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+      const panelWidth = panel?.getBoundingClientRect().width ?? 340;
+
+      let art: string[];
+      if (panelWidth < 300) {
+        art = ['>_'];
+      } else if (panelWidth < 420) {
+        art = [
+          '  ┌─────────┐',
+          '  │  >_     │',
+          '  └─────────┘',
+        ];
+      } else {
+        art = [
+          '  ╔═══════════════╗',
+          '  ║  S  R  O  B   ║',
+          '  ║  >_           ║',
+          '  ╚═══════════════╝',
+        ];
+      }
+
+      const rows: [string, string][] = [
+        ['OS', platform],
+        ['Device', isMobile ? 'mobile' : 'desktop'],
+        ['Screen', screenRes],
+        ['Language', lang],
+        ['Timezone', tz],
+        ['Cores', String(cores)],
+        ['Theme', theme],
+      ];
+
+      const labelWidth = Math.max(...rows.map(([label]) => label.length)) + 2;
+      const lines = rows.map(([label, value]) => `${label.padEnd(labelWidth)}${value}`);
+
+      return [...art, '', 'guest@sroberts', '─'.repeat(20), ...lines].join('\n');
     },
     about: () =>
       `Final year BSc Applied Computing student, Skills Wales competitor, founder of CaerFortis. Type 'cd about' for the full story.`,
@@ -152,12 +180,13 @@
       } catch {
         return 'Could not reach location service.';
       }
-},
+    },
     clear: () => {
       localStorage.removeItem(STORAGE_HISTORY);
       if (output) output.innerHTML = '';
       return null;
     },
+    ctf: () => startCtfMenu(),
   };
 
   type KeywordEntry = { keywords: string[]; response: string | (() => string) };
@@ -172,11 +201,11 @@
     { keywords: ['how are you', "how's it going", 'how you doing'], response: () => "Running fine, no memory leaks that I know of. You?" },
     { keywords: ['thank you', 'thanks', 'cheers'], response: () => "Any time." },
     { keywords: ['bye', 'goodbye', 'see ya'], response: () => "Cheers. I'll still be here if you come back." },
-    { keywords: ['are you real', 'are you ai', 'are you a bot', 'are you chatgpt'], response: () => "Not real AI — just keyword matching under the hood- you're so predictable :P" },
+    { keywords: ['are you real', 'are you ai', 'are you a bot', 'are you chatgpt'], response: () => "Not real AI - just keyword matching under the hood- you're so predictable :P" },
     { keywords: ['your name', 'who is scott', 'who made you'], response: () => "Scott built me. Type 'about' for the actual bio." },
     { keywords: ['joke', 'funny'], response: () => "There are 10 types of people: those who understand binary, and those who don't." },
     { keywords: ['how old', 'your age'], response: () => "I was born the moment someone typed 'help' for the first time. So, young." },
-    { keywords: ['weather'], response: () => "I'm a terminal, not a forecast. Try a window — the other kind." },
+    { keywords: ['weather'], response: () => "I'm a terminal, not a forecast. Try a window - the other kind." },
     { keywords: ['nice site', 'cool site', 'love this', 'nice terminal'], response: () => "Cheers, took a while to get right." },
   ];
 
@@ -187,43 +216,270 @@
     home: '/',
     contact: '/#contact',
   };
-function levenshtein(a: string, b: string): number {
-  const dp: number[][] = Array.from({ length: a.length + 1 }, (_, i) =>
-    Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
-  );
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      dp[i][j] = a[i - 1] === b[j - 1]
-        ? dp[i - 1][j - 1]
-        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-    }
-  }
-  return dp[a.length][b.length];
-}
 
-function closestCommand(word: string): string | null {
-  const allCommands = Object.keys(COMMANDS);
-  let best: string | null = null;
-  let bestDist = 3;
-  for (const cmd of allCommands) {
-    const dist = levenshtein(word, cmd);
-    if (dist < bestDist) {
-      best = cmd;
-      bestDist = dist;
+  function levenshtein(a: string, b: string): number {
+    const dp: number[][] = Array.from({ length: a.length + 1 }, (_, i) =>
+      Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+    );
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
     }
+    return dp[a.length][b.length];
   }
-  return best;
-}
+
+  function closestCommand(word: string): string | null {
+    const allCommands = Object.keys(COMMANDS);
+    let best: string | null = null;
+    let bestDist = 3;
+    for (const cmd of allCommands) {
+      const dist = levenshtein(word, cmd);
+      if (dist < bestDist) {
+        best = cmd;
+        bestDist = dist;
+      }
+    }
+    return best;
+  }
+
+  // ---------- Command history (arrow key recall) ----------
+
+  let commandHistory: string[] = [];
+  let historyIndex = 0;
+  let historyDraft = '';
+
+  function refreshCommandHistory(): void {
+    commandHistory = loadHistory()
+      .filter(line => line.type === 'input')
+      .map(line => line.text);
+    historyIndex = commandHistory.length;
+  }
+
+  // ---------- CTF: The Vault ----------
+
+  type VaultStage = 'start' | 'scanned' | 'connected' | 'read_note' | 'osint_done' | 'cracked' | 'shell' | 'complete';
+
+  let ctfMode: 'menu' | 'vault' | null = null;
+  let vaultStage: VaultStage = 'start';
+
+  // Login prompt state, used by the 'nc' -> interactive login flow
+  let loginStep: 'none' | 'awaiting_user' | 'awaiting_pass' = 'none';
+  let pendingUsername = '';
+
+  const VAULT_TARGET_IP = '10.13.37.5';
+
+  const VAULT_OVERVIEW = "A small company's internal server has been left exposed. Your job: find a way in.\n\nFirst step - scan the target: nmap " + VAULT_TARGET_IP;
+
+  const VAULT_HINTS: Partial<Record<VaultStage, string>> = {
+  scanned: `Two ports are open - 21 (FTP) and 4444 (unknown). Try connecting: ftp ${VAULT_TARGET_IP}`,
+  connected: "You're in via anonymous FTP login. Try 'ls' to see what's here.",
+  read_note: `The sysadmin left a note mentioning a colleague's staff page. Try fetching it - curl ${VAULT_TARGET_IP}/staff/dave`,
+  osint_done: "You've found a personal detail that might double as a password. There's a hash file sitting nearby - 'cat shadow.txt', then 'john shadow.txt' to crack it.",
+  cracked: `Credentials cracked. Port 4444 is still open - connect and log in: nc ${VAULT_TARGET_IP} 4444`,
+  shell: "You're in. Something on this system is worth finding - have a look around.",
+  complete: "Vault cleared. Nice work.",
+};
+  let vaultBriefLog: string[] = [];
+
+  function resetBriefLog(text: string): void {
+    vaultBriefLog = [text];
+    window.dispatchEvent(new CustomEvent('ctf-brief', { detail: { entries: vaultBriefLog, forceOpen: true } }));
+  }
+
+  function appendBrief(text: string): void {
+    vaultBriefLog.push(text);
+    window.dispatchEvent(new CustomEvent('ctf-brief', { detail: { entries: vaultBriefLog, forceOpen: false } }));
+  }
+
+  function resendBrief(): void {
+    window.dispatchEvent(new CustomEvent('ctf-brief', { detail: { entries: vaultBriefLog, forceOpen: true } }));
+  }
+
+  function startCtfMenu(): string {
+    ctfMode = 'menu';
+    return [
+      'Available challenges:',
+      '  1. the-vault - recon to root, beginner-friendly',
+      '',
+      "Type a number or name to begin, or 'exit' to leave.",
+    ].join('\n');
+  }
+
+  function startVault(): string {
+    ctfMode = 'vault';
+    vaultStage = 'start';
+    resetBriefLog(VAULT_OVERVIEW);
+    return [
+      '── THE VAULT ──',
+      '',
+      "Type 'brief' any time to reopen your case notes. Type 'exit' to leave the challenge.",
+    ].join('\n');
+  }
+
+  function handleCtfCommand(trimmed: string, lower: string): string {
+    if (lower === 'exit' || lower === 'quit') {
+      const wasVault = ctfMode === 'vault';
+      ctfMode = null;
+      return wasVault ? 'Leaving the vault. Progress is not saved.' : 'Closed the challenge menu.';
+    }
+
+    if (lower === 'brief') {
+      if (ctfMode === 'vault') {
+        resendBrief();
+        return 'Reopened your case notes.';
+      }
+      return "No active challenge to brief. Type a challenge name first.";
+    }
+
+    if (ctfMode === 'menu') {
+      if (lower === '1' || lower === 'the-vault' || lower === 'vault') {
+        return startVault();
+      }
+      return "Unknown option. Type '1' or 'the-vault' to begin, or 'exit'.";
+    }
+
+    if (ctfMode === 'vault') {
+      if (lower.startsWith('nmap')) {
+        if (vaultStage !== 'start') return "Already scanned. Try 'ls'.";
+        if (!lower.includes(VAULT_TARGET_IP)) return `nmap: try scanning the actual target - ${VAULT_TARGET_IP}`;
+        vaultStage = 'scanned';
+        appendBrief(VAULT_HINTS.scanned!);
+        return [
+          `Scanning ${VAULT_TARGET_IP}...`,
+          'PORT     STATE   SERVICE',
+          '21/tcp   open    ftp',
+          '4444/tcp open    unknown',
+        ].join('\n');
+      }
+      
+      if (lower.startsWith('ftp')) {
+        if (vaultStage !== 'scanned') return "ftp: nothing to connect to, or you're already connected.";
+        if (!lower.includes(VAULT_TARGET_IP)) return `ftp: try connecting to ${VAULT_TARGET_IP}`;
+        vaultStage = 'connected';
+        appendBrief(VAULT_HINTS.connected!);
+        return `Connected to ${VAULT_TARGET_IP}.\n220 FTP server ready.\nName: anonymous\n230 Login successful.`;
+      }
+
+      if (lower === 'ls') {
+        if (vaultStage === 'start' || vaultStage === 'scanned') return "Nothing accessible yet.";
+        if (vaultStage === 'shell' || vaultStage === 'complete') return 'flag.txt';
+        return 'readme.txt  shadow.txt';
+      }
+
+      if (lower === 'cat readme.txt') {
+        if (vaultStage === 'start' || vaultStage === 'scanned') return "File not found.";
+        if (vaultStage === 'connected') {
+          vaultStage = 'read_note';
+          appendBrief(VAULT_HINTS.read_note!);
+        }
+        return '"Reminder to self: rotate the FTP password. Also - Dave from IT\nkeeps his staff bio page way too public: 10.13.37.5/staff/dave. One of\nthese days that\'ll bite us."';
+      }
+
+      if (lower.startsWith('curl')) {
+        if (vaultStage !== 'read_note' && vaultStage !== 'osint_done') return "curl: nothing worth fetching right now.";
+        if (!lower.includes(VAULT_TARGET_IP) || !lower.includes('staff')) {
+          return `curl: try fetching the staff page - curl ${VAULT_TARGET_IP}/staff/dave`;
+        }
+        if (vaultStage === 'read_note') {
+          vaultStage = 'osint_done';
+          appendBrief(VAULT_HINTS.osint_done!);
+        }
+        return [
+          '<html><body>',
+          '<h1>Dave Whitfield - IT Support</h1>',
+          '<p>Ask me anything about printers. Also, shoutout to my childhood dog Biscuit99, RIP legend.</p>',
+          '</body></html>',
+        ].join('\n');
+      }
+
+      if (lower === 'cat shadow.txt') {
+        if (vaultStage === 'start' || vaultStage === 'scanned' || vaultStage === 'connected') return "File not found.";
+        return 'dave:8f14e45fceea167a5a36dedd4bea2543';
+      }
+
+      if (lower === 'john shadow.txt') {
+        if (vaultStage !== 'osint_done') return "Nothing to crack yet - you'll need a hash and a good guess first.";
+        vaultStage = 'cracked';
+        appendBrief(VAULT_HINTS.cracked!);
+        return 'Cracking...\ndave:biscuit99';
+      }
+
+      if (lower.startsWith('nc ')) {
+        if (vaultStage !== 'cracked') return "Connection refused.";
+        if (!lower.includes(VAULT_TARGET_IP) || !lower.includes('4444')) {
+          return `nc: try connecting to ${VAULT_TARGET_IP} on port 4444`;
+        }
+        loginStep = 'awaiting_user';
+        return `Connecting to ${VAULT_TARGET_IP}:4444...\nlogin: `;
+      }
+
+      if (lower === 'cat flag.txt') {
+        if (vaultStage !== 'shell' && vaultStage !== 'complete') return "File not found.";
+        vaultStage = 'complete';
+        appendBrief(VAULT_HINTS.complete!);
+        return 'flag{th3_v4ult_h4d_4_w34k_l1nk}';
+      }
+
+      return "Command not recognised in this challenge. Type 'brief' if you're stuck, or 'exit' to leave.";
+    }
+
+    return "Something went wrong - type 'exit' and try 'ctf' again.";
+  }
+
   async function handleCommand(raw: string): Promise<void> {
     const trimmed = raw.trim();
     if (!trimmed) return;
 
+    // Interactive login prompt, triggered by 'nc' inside the vault
+    if (loginStep === 'awaiting_user') {
+      printLine(trimmed, 'input');
+      pendingUsername = trimmed;
+      loginStep = 'awaiting_pass';
+      if (input) input.type = 'password';
+      printLine('Password: ');
+      return;
+    }
+
+    if (loginStep === 'awaiting_pass') {
+      printLine('•'.repeat(trimmed.length), 'input');
+      if (input) input.type = 'text';
+      const success = pendingUsername.toLowerCase() === 'dave' && trimmed === 'biscuit99';
+      loginStep = 'none';
+      if (success) {
+        vaultStage = 'shell';
+        appendBrief(VAULT_HINTS.shell!);
+        printLine('Login successful.\nAccess granted.');
+      } else {
+        printLine('Login incorrect.');
+      }
+      return;
+    }
+
     printLine(trimmed, 'input');
 
-    const lower = trimmed.toLowerCase().replace(/[?!.,]/g, '').trim();
+    commandHistory.push(trimmed);
+    historyIndex = commandHistory.length;
+    historyDraft = '';
 
-    if (lower.startsWith('cd ')) {
-      const dest = lower.replace('cd ', '').replace(/[\/.]/g, '').trim();
+    const lowerRaw = trimmed.toLowerCase().trim();
+    const lowerClean = lowerRaw.replace(/[?!.,]/g, '').trim();
+
+    if (ctfMode !== null) {
+      const response = handleCtfCommand(trimmed, lowerRaw);
+      printLine(response);
+      return;
+    }
+
+    if (lowerRaw.startsWith('sudo')) {
+      printLine("Nice try. You don't have root on this one.");
+      return;
+    }
+
+    if (lowerRaw.startsWith('cd ')) {
+      const dest = lowerRaw.replace('cd ', '').replace(/[\/.]/g, '').trim();
       const route = ROUTES[dest];
       if (route) {
         printLine(`navigating to ${route}...`);
@@ -234,22 +490,22 @@ function closestCommand(word: string): string | null {
       return;
     }
 
-  if (COMMANDS[lower]) {
-    const result = await COMMANDS[lower]();
-    if (result) printLine(result);
-    return;
-  }
+    if (COMMANDS[lowerRaw]) {
+      const result = await COMMANDS[lowerRaw]();
+      if (result) printLine(result);
+      return;
+    }
 
     for (const entry of KEYWORD_MAP) {
-      if (entry.keywords.some(k => lower.includes(k))) {
-        const raw = typeof entry.response === 'function' ? entry.response() : COMMANDS[entry.response]?.();
-        const res = await raw;
+      if (entry.keywords.some(k => lowerClean.includes(k))) {
+        const raw2 = typeof entry.response === 'function' ? entry.response() : COMMANDS[entry.response]?.();
+        const res = await raw2;
         if (res) printLine(res);
         return;
       }
     }
 
-  const suggestion = closestCommand(lower);
+    const suggestion = closestCommand(lowerClean);
     if (suggestion) {
       printLine(`command not found: ${trimmed}. Did you mean '${suggestion}'?`);
     } else {
@@ -267,6 +523,7 @@ function closestCommand(word: string): string | null {
     localStorage.setItem(STORAGE_OPEN, 'true');
     input?.focus();
     renderHistory();
+    refreshCommandHistory();
   }
 
   function closePanel(): void {
@@ -281,9 +538,39 @@ function closestCommand(word: string): string | null {
   closeBtn?.addEventListener('click', closePanel);
 
   input?.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && input) {
+    if (!input) return;
+
+    if (e.key === 'Enter') {
       handleCommand(input.value);
       input.value = '';
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistory.length === 0) return;
+      if (historyIndex === commandHistory.length) {
+        historyDraft = input.value;
+      }
+      historyIndex = Math.max(0, historyIndex - 1);
+      input.value = commandHistory[historyIndex];
+      requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (commandHistory.length === 0) return;
+      if (historyIndex >= commandHistory.length) return;
+      if (historyIndex < commandHistory.length - 1) {
+        historyIndex++;
+        input.value = commandHistory[historyIndex];
+      } else {
+        historyIndex = commandHistory.length;
+        input.value = historyDraft;
+      }
+      requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+      return;
     }
   });
 
@@ -320,7 +607,7 @@ function closestCommand(word: string): string | null {
     openPanel();
   }
 
-  // ---------- Resize persistence ----------
+  // ---------- Resize persistence (catches any size change) ----------
 
   if (panel && 'ResizeObserver' in window) {
     const observer = new ResizeObserver(() => {
@@ -344,27 +631,6 @@ function closestCommand(word: string): string | null {
     const rect = panel.getBoundingClientRect();
     dragOffsetX = e.clientX - rect.left;
     dragOffsetY = e.clientY - rect.top;
-    dragHandle.setPointerCapture(e.pointerId);
-  });
-
-  dragHandle?.addEventListener('pointermove', (e: PointerEvent) => {
-    if (!dragging || !panel) return;
-    const maxLeft = window.innerWidth - panel.offsetWidth;
-    const maxTop = window.innerHeight - panel.offsetHeight;
-    const newLeft = Math.min(Math.max(0, e.clientX - dragOffsetX), Math.max(0, maxLeft));
-    const newTop = Math.min(Math.max(0, e.clientY - dragOffsetY), Math.max(0, maxTop));
-    panel.style.left = `${newLeft}px`;
-    panel.style.top = `${newTop}px`;
-    panel.style.right = 'auto';
-    panel.style.bottom = 'auto';
-  });
-
-  dragHandle?.addEventListener('pointerup', (e: PointerEvent) => {
-    if (!dragging || !panel) return;
-    dragging = false;
-    dragHandle.releasePointerCapture(e.pointerId);
-    const rect = panel.getBoundingClientRect();
-    localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
   });
 
   // ---------- Multi-direction resize ----------
@@ -393,13 +659,30 @@ function closestCommand(word: string): string | null {
       startX = e.clientX;
       startY = e.clientY;
       startRect = panel.getBoundingClientRect();
-      handle.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
+  });
 
-    handle.addEventListener('pointermove', (e: PointerEvent) => {
-      if (!resizing || !panel || !startRect) return;
+  // ---------- Shared document-level move/up handling ----------
+  // Listening on `document` (rather than the small handle elements) means
+  // dragging and resizing keep working even if the pointer moves fast,
+  // leaves the handle's bounds, or pointer capture fails to engage -
+  // e.g. right after reopening a closed tab.
 
+  document.addEventListener('pointermove', (e: PointerEvent) => {
+    if (dragging && panel) {
+      const maxLeft = window.innerWidth - panel.offsetWidth;
+      const maxTop = window.innerHeight - panel.offsetHeight;
+      const newLeft = Math.min(Math.max(0, e.clientX - dragOffsetX), Math.max(0, maxLeft));
+      const newTop = Math.min(Math.max(0, e.clientY - dragOffsetY), Math.max(0, maxTop));
+      panel.style.left = `${newLeft}px`;
+      panel.style.top = `${newTop}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      return;
+    }
+
+    if (resizing && panel && startRect) {
       const deltaX = e.clientX - startX;
       const deltaY = e.clientY - startY;
 
@@ -429,13 +712,18 @@ function closestCommand(word: string): string | null {
       panel.style.top = `${newTop}px`;
       panel.style.right = 'auto';
       panel.style.bottom = 'auto';
-    });
+    }
+  });
 
-    handle.addEventListener('pointerup', (e: PointerEvent) => {
-      if (!resizing) return;
+  document.addEventListener('pointerup', () => {
+    if (dragging && panel) {
+      dragging = false;
+      const rect = panel.getBoundingClientRect();
+      localStorage.setItem(STORAGE_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+    }
+    if (resizing) {
       resizing = false;
-      handle.releasePointerCapture(e.pointerId);
       saveSizeAndPosition();
-    });
+    }
   });
 </script>
